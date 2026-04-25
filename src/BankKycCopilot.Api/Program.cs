@@ -5,6 +5,10 @@ using BankKycCopilot.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using BankKycCopilot.Application.Mapping;
 using BankKycCopilot.Api.Middlewares;
+using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using FluentValidation.AspNetCore;
+using BankKycCopilot.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +20,28 @@ builder.Services.AddScoped<ApplicantService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateApplicantDtoValidator>();
+
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return new BadRequestObjectResult(new
+            {
+                message = "Validation failed.",
+                errors
+            });
+        };
+    });
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
