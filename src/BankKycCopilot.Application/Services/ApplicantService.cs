@@ -1,3 +1,4 @@
+using AutoMapper;
 using BankKycCopilot.Application.DTOs;
 using BankKycCopilot.Application.Interfaces;
 using BankKycCopilot.Domain.Entities;
@@ -7,10 +8,12 @@ namespace BankKycCopilot.Application.Services;
 public class ApplicantService
 {
     private readonly IApplicantRepository _repository;
+    private readonly IMapper _mapper; // 👈 EKLENDİ
 
-    public ApplicantService(IApplicantRepository repository)
+    public ApplicantService(IApplicantRepository repository, IMapper mapper) // 👈 GÜNCELLENDİ
     {
         _repository = repository;
+        _mapper = mapper;
     }
 
     public async Task<Guid> CreateAsync(CreateApplicantDto dto, CancellationToken cancellationToken = default)
@@ -21,7 +24,7 @@ public class ApplicantService
         if (string.IsNullOrWhiteSpace(dto.NationalId))
             throw new ArgumentException("National id is required.");
 
-        var exists = await _repository.ExistsByNationalIdAsync(dto.NationalId, cancellationToken);
+        var exists = await _repository.ExistsByNationalIdAsync(dto.NationalId.Trim(), cancellationToken);
 
         if (exists)
             throw new Exception("Bu NationalId ile kayıt zaten var");
@@ -40,8 +43,10 @@ public class ApplicantService
 
         return applicant.Id;
     }
-    public async Task<List<Applicant>> GetAllAsync(CancellationToken cancellationToken = default)
+
+    public async Task<List<ApplicantDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _repository.GetAllAsync(cancellationToken);
+        var applicants = await _repository.GetAllAsync(cancellationToken);
+        return _mapper.Map<List<ApplicantDto>>(applicants);
     }
 }

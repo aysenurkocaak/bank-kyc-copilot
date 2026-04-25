@@ -3,6 +3,8 @@ using BankKycCopilot.Application.Services;
 using BankKycCopilot.Infrastructure.Persistence;
 using BankKycCopilot.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using BankKycCopilot.Application.Mapping;
+using BankKycCopilot.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +14,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IApplicantRepository, ApplicantRepository>();
 builder.Services.AddScoped<ApplicantService>();
 
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -26,5 +32,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
 
 app.Run();
