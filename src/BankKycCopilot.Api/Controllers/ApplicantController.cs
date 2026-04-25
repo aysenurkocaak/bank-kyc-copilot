@@ -23,4 +23,11 @@ public class ApplicantController : ControllerBase
         var id = await _service.CreateAsync(dto, cancellationToken);
         return Ok(id);
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        var result = await _service.GetAllAsync(cancellationToken);
+        return Ok(result);
+    }
 }

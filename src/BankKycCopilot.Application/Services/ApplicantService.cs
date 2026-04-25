@@ -40,4 +40,8 @@ public class ApplicantService
 
         return applicant.Id;
     }
+    public async Task<List<Applicant>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetAllAsync(cancellationToken);
+    }
 }

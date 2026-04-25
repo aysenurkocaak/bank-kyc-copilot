@@ -23,6 +23,12 @@ public class ApplicantRepository : IApplicantRepository
     public async Task<bool> ExistsByNationalIdAsync(string nationalId, CancellationToken cancellationToken = default)
     {
         return await _context.Applicants
-            .AnyAsync(x => x.NationalId == nationalId, cancellationToken);
+        .AnyAsync(x => x.NationalId == nationalId, cancellationToken);
+    }
+    public async Task<List<Applicant>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Applicants
+        .AsNoTracking()
+        .ToListAsync(cancellationToken);
     }
 }

@@ -7,4 +7,5 @@ public interface IApplicantRepository
     Task AddAsync(Applicant applicant, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsByNationalIdAsync(string nationalId, CancellationToken cancellationToken = default);
+    Task<List<Applicant>> GetAllAsync(CancellationToken cancellationToken = default);
 }
