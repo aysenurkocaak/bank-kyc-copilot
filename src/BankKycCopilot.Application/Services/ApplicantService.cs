@@ -1,11 +1,19 @@
 using BankKycCopilot.Application.DTOs;
+using BankKycCopilot.Application.Interfaces;
 using BankKycCopilot.Domain.Entities;
 
 namespace BankKycCopilot.Application.Services;
 
 public class ApplicantService
 {
-    public Applicant CreateApplicant(CreateApplicantDto dto)
+    private readonly IApplicantRepository _repository;
+
+    public ApplicantService(IApplicantRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Guid> CreateAsync(CreateApplicantDto dto, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(dto.FullName))
             throw new ArgumentException("Full name is required.");
@@ -13,19 +21,12 @@ public class ApplicantService
         if (string.IsNullOrWhiteSpace(dto.NationalId))
             throw new ArgumentException("National id is required.");
 
-        if (string.IsNullOrWhiteSpace(dto.Phone))
-            throw new ArgumentException("Phone is required.");
+        var exists = await _repository.ExistsByNationalIdAsync(dto.NationalId, cancellationToken);
 
-        if (string.IsNullOrWhiteSpace(dto.Email))
-            throw new ArgumentException("Email is required.");
+        if (exists)
+            throw new Exception("Bu NationalId ile kayıt zaten var");
 
-        if (string.IsNullOrWhiteSpace(dto.Country))
-            throw new ArgumentException("Country is required.");
-
-        if (string.IsNullOrWhiteSpace(dto.City))
-            throw new ArgumentException("City is required.");
-
-        return new Applicant(
+        var applicant = new Applicant(
             dto.FullName.Trim(),
             dto.NationalId.Trim(),
             dto.Phone.Trim(),
@@ -34,5 +35,9 @@ public class ApplicantService
             dto.Country.Trim(),
             dto.City.Trim()
         );
+
+        await _repository.AddAsync(applicant, cancellationToken);
+
+        return applicant.Id;
     }
 }

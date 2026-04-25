@@ -1,11 +1,17 @@
 using BankKycCopilot.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-
+using BankKycCopilot.Application.Interfaces;
+using BankKycCopilot.Infrastructure.Repositories;
+using BankKycCopilot.Application.Services; // 👈 EKLE
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IApplicantRepository, ApplicantRepository>();
+builder.Services.AddScoped<ApplicantService>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
