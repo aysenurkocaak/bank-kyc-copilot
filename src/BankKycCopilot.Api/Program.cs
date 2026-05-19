@@ -57,6 +57,8 @@ app.UseSerilogRequestLogging(options =>
         "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
 });
 
+app.UseMiddleware<CorrelationIdMiddleware>();
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
