@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-
+using Serilog;
 namespace BankKycCopilot.Api.Middlewares;
 
 public class ExceptionMiddleware
@@ -20,14 +20,13 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "DUPLICATE_OR_UNHANDLED_EXCEPTION: {Message}", ex.Message);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-
             var response = new
             {
                 message = ex.Message
             };
-
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
     }
