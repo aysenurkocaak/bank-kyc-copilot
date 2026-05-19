@@ -1,3 +1,4 @@
+using BankKycCopilot.Application.Interfaces.Workflows;
 using AutoMapper;
 using BankKycCopilot.Application.DTOs;
 using BankKycCopilot.Application.Interfaces;
@@ -8,12 +9,18 @@ namespace BankKycCopilot.Application.Services;
 public class ApplicantService
 {
     private readonly IApplicantRepository _repository;
-    private readonly IMapper _mapper; // 👈 EKLENDİ
+    private readonly IMapper _mapper;
+    private readonly IWorkflowClient _workflowClient;
 
-    public ApplicantService(IApplicantRepository repository, IMapper mapper) // 👈 GÜNCELLENDİ
+
+    public ApplicantService(
+        IApplicantRepository repository, 
+        IMapper mapper,
+        IWorkflowClient workflowClient) 
     {
         _repository = repository;
         _mapper = mapper;
+        _workflowClient = workflowClient;
     }
 
     public async Task<Guid> CreateAsync(CreateApplicantDto dto, CancellationToken cancellationToken = default)
@@ -40,6 +47,7 @@ public class ApplicantService
         );
 
         await _repository.AddAsync(applicant, cancellationToken);
+        await _workflowClient.NotifyApplicantCreatedAsync(applicant.Id, cancellationToken);
 
         return applicant.Id;
     }

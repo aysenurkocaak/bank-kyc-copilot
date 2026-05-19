@@ -1,3 +1,6 @@
+using BankKycCopilot.Infrastructure.Configurations;
+using BankKycCopilot.Application.Interfaces.Workflows;
+using BankKycCopilot.Infrastructure.Workflows;
 using BankKycCopilot.Application.Interfaces;
 using BankKycCopilot.Application.Services;
 using BankKycCopilot.Infrastructure.Persistence;
@@ -23,7 +26,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IApplicantRepository, ApplicantRepository>();
 builder.Services.AddScoped<ApplicantService>();
-
+builder.Services.Configure<WorkflowOptions>(
+    builder.Configuration.GetSection(WorkflowOptions.SectionName));
+builder.Services.AddHttpClient<IWorkflowClient, N8nWorkflowClient>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddFluentValidationAutoValidation();
